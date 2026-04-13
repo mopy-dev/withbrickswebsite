@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>With Bricks</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:linear-gradient(120deg,#facc15,#f59e0b);color:#1f2937}
+
+header{text-align:center;padding:30px}
+header img{width:100px;border-radius:50%;margin-bottom:10px}
+
+section{max-width:1000px;margin:auto;padding:20px}
+
+.card{
+ background:rgba(255,255,255,0.85);
+ padding:20px;
+ border-radius:20px;
+ margin-bottom:20px;
+}
+
+.link-btn{
+ display:block;
+ padding:12px;
+ margin:10px 0;
+ background:#111;
+ color:white;
+ border-radius:12px;
+ text-align:center;
+ text-decoration:none;
+}
+
+.counter{
+ font-size:2rem;
+ text-align:center;
+ font-weight:bold;
+}
+
+iframe{
+ width:100%;
+ height:300px;
+ border:none;
+ border-radius:15px;
+}
+
+canvas{
+ display:block;
+ margin:auto;
+ background:#111;
+ border-radius:15px;
+}
+
+button{
+ padding:10px 15px;
+ margin:5px;
+ border:none;
+ border-radius:10px;
+ background:#111;
+ color:white;
+ cursor:pointer;
+}
+
+/* ✅ NIEUWE SUBSCRIBE KNOP */
+.subscribe-btn{
+ display:block;
+ width:300px;
+ margin:40px auto;
+ padding:20px;
+ text-align:center;
+ background:red;
+ color:white;
+ font-size:1.5rem;
+ font-weight:bold;
+ border-radius:20px;
+ text-decoration:none;
+ transition:0.3s;
+}
+.subscribe-btn:hover{
+ transform:scale(1.1);
+ background:#cc0000;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<img src="https://yt3.googleusercontent.com/9TKOrV0Mi0baTn1Unlxexo01tGNl8p4hoVdkGJW45XROh9fHEqdw_5bc3tCHJPuL_lhDezr4y0w=s160-c-k-c0x00ffffff-no-rj">
+<h1>🟨 With Bricks</h1>
+</header>
+
+<section>
+
+<div class="card">
+<h2>📊 Subscribers</h2>
+<div class="counter" id="subCount">Loading...</div>
+</div>
+
+<div class="card">
+<h2>📺 Laatste Video</h2>
+<iframe src="https://www.youtube.com/embed/gK1sVErhrOs" allowfullscreen></iframe>
+</div>
+
+<div class="card">
+<h2>📌 Bio</h2>
+<p>
+Welkom op de officiële With Bricks website! 🟨  
+Hier vind je creatieve LEGO builds, leuke video's en een eigen mini-game.  
+Abonneer je op het kanaal en blijf bouwen! 🚀
+</p>
+</div>
+
+<div class="card">
+<h2>🔗 Links</h2>
+<a class="link-btn" href="https://scratch.mit.edu/users/With-Bricks-Official" target="_blank">🎮 Scratch</a>
+<a class="link-btn" href="https://www.youtube.be/@with_Bricks" target="_blank">📺 YouTube</a>
+<a class="link-btn" href="https://youtube.com/@withgames4you" target="_blank">🎮 Gaming Kanaal</a>
+<a class="link-btn" href="https://discord.gg/5s7za4ueCA" target="_blank">🤖 Discord Server</a>
+<a class="link-btn" href="https://whatsapp.com/channel/0029Vb1RUZp8vd1UQkLlEJ2z" target="_blank">💬 WhatsApp Kanaal</a>
+</div>
+
+<div class="card">
+<h2>🎮 LEGO Game</h2>
+<canvas id="game" width="400" height="500"></canvas>
+
+<div style="text-align:center">
+<button onclick="moveLeft()">⬅️</button>
+<button onclick="moveRight()">➡️</button>
+</div>
+
+<p id="score"></p>
+<p id="highscore"></p>
+</div>
+
+<div class="card">
+<h2>💖 Donatie</h2>
+<form action="https://www.paypal.com/donate" method="post" target="_blank">
+<input type="hidden" name="business" value="vandenbroeckthijs2013@gmail.com">
+<input type="hidden" name="currency_code" value="EUR">
+<button type="submit">Doneer via PayPal</button>
+</form>
+</div>
+
+</section>
+
+<!-- ✅ NIEUWE SUBSCRIBE KNOP ONDERAAN -->
+<a class="subscribe-btn" 
+   href="https://www.youtube.com/@with_BRICKS?sub_confirmation=1" 
+   target="_blank"
+   onclick="alert('Bedankt voor het abonneren! 🔥')">
+   🔴 ABONNEER NU
+</a>
+
+<script>
+// =====================
+// CORRECTE SUB COUNT (HANDLE)
+// =====================
+const API_KEY = "AIzaSyC19hojbbr_f3FklXF0Y3e4U9Zj8-_EW6w";
+
+async function loadSubs(){
+ try{
+  const res = await fetch(
+    `https://www.googleapis.com/youtube/v3/channels?part=statistics&forHandle=@with_BRICKS&key=${API_KEY}`
+  );
+
+  const data = await res.json();
+  console.log("API:", data);
+
+  if(!data.items || data.items.length === 0){
+    throw new Error("Kanaal niet gevonden");
+  }
+
+  const subs = data.items[0].statistics.subscriberCount;
+
+  document.getElementById("subCount").innerText =
+    subs + " subscribers";
+
+ }catch(err){
+  console.error(err);
+  document.getElementById("subCount").innerText = "API fout";
+ }
+}
+
+loadSubs();
+
+// =====================
+// LEGO GAME
+// =====================
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+let player = { x:170, y:460, w:60, h:20 };
+let blocks = [];
+let score = 0;
+let highscore = localStorage.getItem('highscore') || 0;
+
+document.getElementById('highscore').innerText = "Highscore: " + highscore;
+
+function spawnBlock(){
+  blocks.push({ x:Math.random()*360, y:0, size:30 });
+}
+setInterval(spawnBlock, 800);
+
+function drawPlayer(){
+  ctx.fillStyle = 'yellow';
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+}
+
+function drawBlocks(){
+  blocks.forEach((b,i)=>{
+    ctx.fillStyle = 'orange';
+    ctx.fillRect(b.x,b.y,b.size,b.size);
+    b.y += 4;
+
+    if(b.y+b.size>player.y && b.x<player.x+player.w && b.x+b.size>player.x){
+      score++;
+      blocks.splice(i,1);
+    }
+
+    if(b.y>500){
+      if(score>highscore){
+        highscore = score;
+        localStorage.setItem('highscore',highscore);
+      }
+      score = 0;
+      blocks = [];
+    }
+  });
+}
+
+function drawScore(){
+  document.getElementById('score').innerText = "Score: " + score;
+  document.getElementById('highscore').innerText = "Highscore: " + highscore;
+}
+
+function loop(){
+  ctx.clearRect(0,0,400,500);
+  drawPlayer();
+  drawBlocks();
+  drawScore();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('mousemove',e=>{
+  const rect = canvas.getBoundingClientRect();
+  player.x = e.clientX - rect.left - player.w/2;
+});
+
+function moveLeft(){ player.x -= 30 }
+function moveRight(){ player.x += 30 }
+
+loop();
+</script>
+
+</body>
+</html>
